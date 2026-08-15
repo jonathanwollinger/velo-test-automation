@@ -1,6 +1,6 @@
 import { expect, Page } from '@playwright/test'
 
-type OptionalFeature = 'precision-park' | 'flux-capacitor'
+type CarOptional = 'precision-park' | 'flux-capacitor'
 
 export function createConfiguratorActions(page: Page) {
     return {
@@ -16,25 +16,21 @@ export function createConfiguratorActions(page: Page) {
             await page.getByRole('button', { name }).click()
         },
 
-        async toggleOptional(optional: OptionalFeature) {
+        async setOptional(optional: CarOptional, enabled: boolean) {
             const optionalCheckbox = page.getByTestId(`opt-${optional}`)
+        
             await expect(optionalCheckbox).toBeVisible()
-            await optionalCheckbox.click()
-        },
-
-        async expectOptionalSelected(optional: OptionalFeature, selected: boolean) {
-            const optionalCheckbox = page.getByTestId(`opt-${optional}`)
-            await expect(optionalCheckbox).toBeVisible()
-
-            if (selected) {
-                await expect(optionalCheckbox).toBeChecked()
-                return
+        
+            if (await optionalCheckbox.isChecked() !== enabled) {
+                await optionalCheckbox.click()
             }
-
-            await expect(optionalCheckbox).not.toBeChecked()
+        
+            await expect(optionalCheckbox).toBeChecked({
+                checked: enabled,
+            })
         },
 
-        async expectPrice(price: string) {
+        async expectTotalPrice(price: string) {
             const priceElement = page.getByTestId('total-price')
             await expect(priceElement).toBeVisible()
             await expect(priceElement).toHaveText(price)
@@ -45,17 +41,11 @@ export function createConfiguratorActions(page: Page) {
             await expect(carImage).toHaveAttribute('src', src)
         },
 
-        async checkout() {
+        async goToCheckout() {
             const checkoutButton = page.getByTestId('checkout-button')
             await expect(checkoutButton).toBeVisible()
             await checkoutButton.click()
             await expect(page).toHaveURL(/\/order$/)
-        },
-
-        async expectCheckoutPrice(price: string) {
-            const checkoutPrice = page.getByTestId('summary-total-price')
-            await expect(checkoutPrice).toBeVisible()
-            await expect(checkoutPrice).toHaveText(price)
         },
     }
 }
