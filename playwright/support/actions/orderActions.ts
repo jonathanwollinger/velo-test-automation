@@ -4,6 +4,8 @@ export function createOrderActions(page: Page) {
     return {
         async open() {
             await page.goto('/order')
+            await expect(page).toHaveURL('/order')
+            await expect(page.getByRole('heading', { name: 'Finalizar Pedido'})).toBeVisible()
         },
 
         async expectTotalPrice(price: string) {
